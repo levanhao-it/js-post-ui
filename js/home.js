@@ -1,73 +1,55 @@
 import postApi from './api/postApi';
-import { setTextContent, truncateText } from './utils';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import { initPagination, initSearch, renderPagination, renderPostList } from './utils';
 
-// to use fromNow funtion
-dayjs.extend(relativeTime);
+async function handleFilterChange(filterName, filterValue) {
+  try {
+    //update query params
+    const url = new URL(window.location);
+    url.searchParams.set(filterName, filterValue);
 
-function createPostElement(post) {
-  if (!post) return;
+    if (filterName === 'title_like') url.searchParams.set('_page', 1);
 
-  //find and clone template
-  const postTemplate = document.getElementById('postTemplate');
-  if (!postTemplate) return;
+    history.pushState({}, '', url);
 
-  const liElement = postTemplate.content.firstElementChild.cloneNode(true);
-
-  if (!liElement) return;
-
-  //update title, description, author, thumbail
-  // const titleElement = liElement.querySelector('[data-id="title"]');
-  // if (titleElement) titleElement.textContent = post.title;
-  setTextContent(liElement, '[data-id="title"]', post.title);
-  setTextContent(liElement, '[data-id="description"]', truncateText(post.description, 200));
-  setTextContent(liElement, '[data-id="author"]', post.author);
-
-  // const descriptionElement = liElement.querySelector('[data-id="description"]');
-  // if (descriptionElement) descriptionElement.textContent = post.description;
-
-  // const authorElement = liElement.querySelector('[data-id="author"]');
-  // if (authorElement) authorElement.textContent = post.author;
-
-  //calculate timespace
-  // console.log('time', dayjs('1633700485638').fromNow());
-
-  setTextContent(liElement, '[data-id="timeSpan"]', `- ${dayjs(post.updatedAt).fromNow()}`);
-
-  const thumbnailElement = liElement.querySelector('[data-id="thumbnail"]');
-  if (thumbnailElement) {
-    thumbnailElement.src = post.imageUrl;
-
-    thumbnailElement.addEventListener('error', () => {
-      thumbnailElement.src = 'https://via.placeholder.com/468x60?text=thumbnail';
-    });
+    // fetch API
+    // re-render post list
+    const { data, pagination } = await postApi.getAll(url.searchParams);
+    renderPostList('postList', data);
+    renderPagination('pagination', pagination);
+  } catch (error) {
+    console.log('failed to fetch post list', error);
   }
-  //attach even
-
-  return liElement;
-}
-
-function renderPostList(postList) {
-  if (!Array.isArray(postList) || postList.length === 0) return;
-
-  const ulElement = document.getElementById('postList');
-  if (!ulElement) return;
-
-  postList.forEach((post, idx) => {
-    const liElement = createPostElement(post);
-    ulElement.appendChild(liElement);
-  });
 }
 
 (async () => {
   try {
-    const queryParam = {
-      _page: 1,
-      _limit: 6,
-    };
-    const { data, pagination } = await postApi.getAll(queryParam);
-    renderPostList(data);
+    const url = new URL(window.location);
+
+    //update search param if needed
+    if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1);
+    if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 12);
+
+    history.pushState({}, '', url);
+    const queryParams = url.searchParams;
+
+    // attach click event links
+    initPagination({
+      elementId: 'pagination',
+      defaultParams: queryParams,
+      onChange: (page) => handleFilterChange('_page', page),
+    });
+    initSearch({
+      elementId: 'searchInput',
+      defaultParams: queryParams,
+      onChange: (value) => handleFilterChange('title_like', value),
+    });
+
+    // set default pagination (_limit,_page) on URL
+    // render post list based URL params
+    // set default query param if not existed
+    const { data, pagination } = await postApi.getAll(queryParams);
+    renderPostList('postList', data);
+    renderPagination('pagination', pagination);
   } catch (error) {
     console.log('get all failed: ', error);
     //show model or toast
