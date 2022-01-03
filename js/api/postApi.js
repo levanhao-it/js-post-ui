@@ -7,7 +7,7 @@ const postApi = {
   },
 
   getById(id) {
-    const url = `./post/${id}`;
+    const url = `./posts/${id}`;
     return axiosClient.get(url);
   },
 
@@ -17,12 +17,12 @@ const postApi = {
   },
 
   update(data) {
-    const url = `./post/${data.id}`;
+    const url = `./posts/${data.id}`;
     return axiosClient.post(url, data);
   },
 
   remove(id) {
-    const url = `./post/${id}`;
+    const url = `./posts/${id}`;
     return axiosClient.delete(url);
   },
 };
