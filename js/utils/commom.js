@@ -21,3 +21,9 @@ export function setBackgoundImage(parent, selector, imgUrl) {
   const element = parent.querySelector(selector);
   if (element) element.style.backgroundImage = `url("${imgUrl}")`;
 }
+export function randomNumber(n) {
+  if (n <= 0) return -1;
+
+  const random = Math.random() * n;
+  return Math.round(random);
+}

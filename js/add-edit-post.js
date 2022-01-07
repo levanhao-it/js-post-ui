@@ -1,5 +1,62 @@
 import postApi from './api/postApi';
-import { initPostForm } from './utils';
+import { initPostForm, toast } from './utils';
+
+function removeUnusedFileds(formValues) {
+  const payload = { ...formValues };
+  // imageSoure='picsum' --> remove image
+  // imageSoure='upload' --> remove imageUrl
+  // finally remove imageSource
+  if (payload.imageSource === 'upload') {
+    delete payload.imageUrl;
+  } else {
+    delete payload.image;
+  }
+  delete payload.imageSource;
+
+  // remove id if it's add mode
+  if (!formValues.id) delete payload.id;
+  return payload;
+}
+
+function jsonToFormData(jsonObject) {
+  const formData = new FormData();
+
+  for (const key in jsonObject) {
+    formData.set(key, jsonObject[key]);
+  }
+
+  return formData;
+}
+
+async function handlePostFormSubmit(formValues) {
+  try {
+    const payload = removeUnusedFileds(formValues);
+    const formData = jsonToFormData(payload);
+    // check add/edit mode
+    // S1: based on search params (check id)
+    // S2: check id in formValues
+    // call Api
+    // let savedPost = null;
+    // if (formValues.id) {
+    //   savedPost = await postApi.update(formValues);
+    // } else {
+    //   savedPost = await postApi.add(formValues);
+    // }
+    const savedPost = formValues.id
+      ? await postApi.updateFormData(formData)
+      : await postApi.addFormData(formData);
+
+    // show cuccess message
+    toast.success('Save post successfully!');
+    // redirect to detail page
+    setTimeout(() => {
+      window.location.assign(`/post-detail.html?id=${savedPost.id}`);
+    }, 2000);
+  } catch (error) {
+    console.log('failed to save post', error);
+    toast.error(`Error: ${error.message} `);
+  }
+}
 
 // main
 (async () => {
@@ -18,7 +75,7 @@ import { initPostForm } from './utils';
     initPostForm({
       formId: 'postForm',
       defaultValues,
-      onSubmit: (formValues) => console.log(formValues),
+      onSubmit: handlePostFormSubmit,
     });
   } catch (error) {
     console.log('fetch data failed from API', error);
