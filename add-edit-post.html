@@ -23,7 +23,7 @@
     <!-- Internal CSS -->
     <link rel="stylesheet" href="/styles/main.css" />
     <link rel="stylesheet" href="/styles/post-detail.css" />
-    <!-- <link rel="stylesheet" href="styles/add-edit-post.css" /> -->
+    <link rel="stylesheet" href="styles/add-edit-post.css" />
 </head>
 
 <body>
@@ -56,7 +56,7 @@
             <div class="container">
                 <div class="post-detail-main shadow-sm">
                     <div class="post-title-wrapper">
-                        <h1 id="postDetailTitle">Add edit a post</h1>
+                        <h1 id="postDetailTitle" style="text-align: center;">Add edit a post</h1>
 
                         <p>
                             <small class="text-muted">Please enter the following information and submit
@@ -87,6 +87,11 @@
                             <textarea class="form-control" name="description" rows="3"></textarea>
                         </div>
 
+                        <!-- <input type="radio" id="male" class="radio-input" name="gender" />
+                        <label for="male" class="radio-label"></label>
+                        <input type="radio" id="fmale" class="radio-input" name="gender" />
+                        <label for="fmale" class="radio-label"></label> -->
+
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="imageSource" id="imageSourcePicsum"
@@ -113,7 +118,7 @@
                             </small>
 
                             <input type="text" class="d-none" name="imageUrl">
-                            <div>
+                            <div class="mt-2">
                                 <button type="button" id="postChangeImage" class="btn btn-dark">
                                     Change post image
                                 </button>
@@ -133,9 +138,10 @@
                         </div>
 
                         <div class="text-center">
-                            <button name="submit" class="btn btn-primary">
+                            <button name="submit" class="btn5-hover btn5">
                                 <i class="fas fa-save mr-1"></i> Save
                             </button>
+
                         </div>
                     </form>
                 </div>
@@ -146,6 +152,7 @@
     <footer class="text-center text-muted py-3">
         <small>Created by Po with <i class="fas fa-heart"></i></small>
     </footer>
+
 
     <!-- Scripts should be placed here to prevent blocking render UI -->
     <script type="module" src="/js/add-edit-post.js"></script>

@@ -64,6 +64,12 @@ async function handlePostFormSubmit(formValues) {
     const searchParams = new URLSearchParams(window.location.search);
     const postId = searchParams.get('id');
 
+    const nameTitle = Boolean(postId) ? 'Edit post' : 'Add a new post';
+    const nameTilleElement = document.getElementById('postDetailTitle');
+    if (nameTilleElement) {
+      nameTilleElement.textContent = nameTitle;
+    }
+
     let defaultValues = Boolean(postId)
       ? await postApi.getById(postId)
       : {

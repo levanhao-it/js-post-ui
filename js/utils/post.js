@@ -18,7 +18,7 @@ export function createPostElement(post) {
 
   //update title, description, author, thumbail
   setTextContent(liElement, '[data-id="title"]', post.title);
-  setTextContent(liElement, '[data-id="description"]', truncateText(post.description, 200));
+  setTextContent(liElement, '[data-id="description"]', truncateText(post.description, 100));
   setTextContent(liElement, '[data-id="author"]', post.author);
 
   //calculate timespace
