@@ -1,11 +1,30 @@
 import postApi from './api/postApi';
-import { initPagination, initSearch, renderPagination, renderPostList } from './utils';
+import { initPagination, initSearch, renderPagination, renderPostList, toast } from './utils';
+
+function registerPostDeleteEvent() {
+  document.addEventListener('post-delete', async (event) => {
+    try {
+      const post = event.detail;
+      const message = ` Are you sure to remove post ${post.title}`;
+      if (window.confirm(message)) {
+        await postApi.remove(post.id);
+
+        await handleFilterChange();
+        toast.success('Remove post successfully');
+      }
+    } catch (error) {
+      console.log('failed to remove post', error);
+      toast.error(error.message);
+    }
+  });
+}
 
 async function handleFilterChange(filterName, filterValue) {
   try {
     //update query params
     const url = new URL(window.location);
-    url.searchParams.set(filterName, filterValue);
+
+    if (filterName) url.searchParams.set(filterName, filterValue);
 
     if (filterName === 'title_like') url.searchParams.set('_page', 1);
 
@@ -32,6 +51,8 @@ async function handleFilterChange(filterName, filterValue) {
     history.pushState({}, '', url);
     const queryParams = url.searchParams;
 
+    registerPostDeleteEvent();
+
     // attach click event links
     initPagination({
       elementId: 'pagination',
@@ -47,9 +68,10 @@ async function handleFilterChange(filterName, filterValue) {
     // set default pagination (_limit,_page) on URL
     // render post list based URL params
     // set default query param if not existed
-    const { data, pagination } = await postApi.getAll(queryParams);
-    renderPostList('postList', data);
-    renderPagination('pagination', pagination);
+    // const { data, pagination } = await postApi.getAll(queryParams);
+    // renderPostList('postList', data);
+    // renderPagination('pagination', pagination);
+    handleFilterChange();
   } catch (error) {
     console.log('get all failed: ', error);
     //show model or toast

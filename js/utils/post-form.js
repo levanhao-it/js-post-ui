@@ -183,6 +183,38 @@ function initUploadImage(form) {
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setBackgoundImage(document, '#postHeroImage', imageUrl);
+
+      //trigger validation of upload input
+      validateFormField(form, { imageSource: ImageSource.UPLOAD, image: file }, 'image');
+    }
+  });
+}
+
+async function validateFormField(form, formValues, name) {
+  try {
+    // clear previous error
+    setFieldError(form, name, '');
+
+    const schema = getPostSchema();
+    await schema.validateAt(name, formValues);
+  } catch (error) {
+    setFieldError(form, name, error.message);
+  }
+  // show validation error (if any)
+  const field = form.querySelector(`[name="${name}"]`);
+  if (field && !field.checkValidity()) {
+    field.parentElement.classList.add('was-validated');
+  }
+}
+
+function initValidationOnchange(form) {
+  ['title', 'author'].forEach((name) => {
+    const field = form.querySelector(`[name="${name}"]`);
+    if (field) {
+      field.addEventListener('input', (event) => {
+        const newValue = event.target.value;
+        validateFormField(form, { [name]: newValue }, name);
+      });
     }
   });
 }
@@ -199,6 +231,7 @@ export function initPostForm({ formId, defaultValues, onSubmit }) {
   initRandomImage(form);
   initRadioImageSoucre(form);
   initUploadImage(form);
+  initValidationOnchange(form);
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();

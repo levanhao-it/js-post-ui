@@ -45,7 +45,7 @@ export function createPostElement(post) {
       window.location.assign(`/post-detail.html?id=${post.id}`);
     });
   }
-  // add clicj event for edit button
+  // add click event for edit button
   const editButton = liElement.querySelector('[data-id="edit"]');
   if (editButton) {
     editButton.addEventListener('click', (e) => {
@@ -55,6 +55,19 @@ export function createPostElement(post) {
       window.location.assign(`/add-edit-post.html?id=${post.id}`);
     });
   }
+
+  // add delete event for edit button
+  const removeButton = liElement.querySelector('[data-id="remove"]');
+  if (removeButton) {
+    removeButton.addEventListener('click', (e) => {
+      const customEvent = new CustomEvent('post-delete', {
+        bubbles: true,
+        detail: post,
+      });
+      removeButton.dispatchEvent(customEvent);
+    });
+  }
+
   return liElement;
 }
 
