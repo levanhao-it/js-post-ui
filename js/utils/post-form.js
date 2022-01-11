@@ -180,6 +180,10 @@ function initUploadImage(form) {
   uploadImage.addEventListener('change', (event) => {
     console.log('selected file', event.target.files[0]);
     const file = event.target.files[0];
+    if (!file) {
+      setBackgoundImage(document, '#postHeroImage', '');
+      validateFormField(form, { imageSource: ImageSource.UPLOAD, image: file }, 'image');
+    }
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setBackgoundImage(document, '#postHeroImage', imageUrl);

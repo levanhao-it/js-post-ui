@@ -1,10 +1,77 @@
+import postApi from '../api/postApi';
+import { setTextContent } from './commom';
+
+export function createPageElement(page) {
+  if (!page) return;
+
+  const pageTemplate = document.getElementById('paginationNumber');
+  if (!pageTemplate) return;
+
+  const liElement = pageTemplate.content.firstElementChild.cloneNode(true);
+  if (!liElement) return;
+  setTextContent(liElement, '[data-id="number"]', page);
+  liElement.dataset.pageNumber = page;
+
+  return liElement;
+}
+export async function renderPaginationNumber(onChange) {
+  try {
+    const url = new URL(window.location);
+    const ulPagination = document.getElementById('pagination');
+
+    if (!ulPagination) return;
+    const pageNumberElement = ulPagination.querySelector('.pageNum');
+    if (!pageNumberElement) return;
+
+    // calc toPages
+    const { data, pagination } = await postApi.getAll(url.searchParams);
+    const { _page, _limit, _totalRows } = pagination;
+    let totalPages = Math.ceil(_totalRows / _limit);
+
+    // render page number
+    const pageList = Array.from({ length: totalPages }, (_, idx) => idx + 1);
+    pageList.forEach((pageNumber) => {
+      const liElement = createPageElement(pageNumber);
+      pageNumberElement.appendChild(liElement);
+    });
+    const liListElement = pageNumberElement.querySelectorAll('li');
+    if (!liListElement) return;
+
+    const page = url.searchParams.get('_page');
+    if (page) {
+      if (liListElement[page - 1] === undefined) {
+        onChange?.(liListElement.length);
+        liListElement[liListElement.length - 1].classList.add('active');
+      } else {
+        liListElement[page - 1].classList.add('active');
+      }
+    }
+
+    liListElement.forEach((li, index) => {
+      li.addEventListener('click', () => {
+        const hasActive = pageNumberElement.querySelector('.active');
+        if (hasActive) hasActive.classList.remove('active');
+        li.classList.add('active');
+        onChange?.(li.dataset.pageNumber);
+      });
+    });
+  } catch (error) {
+    console.log('fetch failed', error);
+  }
+}
+// export function activePagination() {
+//   // const liElement=document.getElementById('pagination').querySelector('.pageNum').querySelectorAll()
+// }
+
 export function renderPagination(elementId, pagination) {
   const ulPagination = document.getElementById(elementId);
-  if (!pagination) return;
+
+  if (!ulPagination) return;
 
   // calc toPages
   const { _page, _limit, _totalRows } = pagination;
-  const totalPages = Math.ceil(_totalRows / _limit);
+
+  let totalPages = Math.ceil(_totalRows / _limit);
 
   // save page and totalPages to UlPagination
   ulPagination.dataset.page = _page;
@@ -23,6 +90,7 @@ export function renderPagination(elementId, pagination) {
 export function initPagination({ elementId, defaultParams, onChange }) {
   //bind click event for prev/next button
   const ulPagination = document.getElementById(elementId);
+
   if (!ulPagination) return;
 
   // set current active page
@@ -34,7 +102,7 @@ export function initPagination({ elementId, defaultParams, onChange }) {
     prevLink.addEventListener('click', (e) => {
       e.preventDefault();
       const page = Number.parseInt(ulPagination.dataset.page) || 1;
-      if (page > 2) onChange?.(page - 1);
+      if (page >= 2) onChange?.(page - 1);
     });
   }
 
@@ -44,9 +112,10 @@ export function initPagination({ elementId, defaultParams, onChange }) {
     nextLink.addEventListener('click', (e) => {
       e.preventDefault();
       const page = Number.parseInt(ulPagination.dataset.page) || 1;
-      const totalPages = ulPagination.dataset.totalPages;
-      if (page >= totalPages) return;
-      if (page < totalPages) onChange?.(page + 1);
+      const total_Pages = ulPagination.dataset.totalPages;
+      if (page >= total_Pages) return;
+      if (page < total_Pages) onChange?.(page + 1);
     });
   }
+  renderPaginationNumber(onChange);
 }

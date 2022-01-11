@@ -1,41 +1,56 @@
 import postApi from './api/postApi';
-import { initPagination, initSearch, renderPagination, renderPostList, toast } from './utils';
+import {
+  initPagination,
+  initSearch,
+  renderPagination,
+  renderPaginationNumber,
+  renderPostList,
+  toast,
+} from './utils';
 
 function showModal(modalElement) {
   if (!window.bootstrap) return;
-  const modal = new window.bootstrap.Modal(modalElement);
-  if (modal) modal.show();
-  const confirm = modalElement.querySelector('.danger');
-  if (!confirm) return;
-  confirm.addEventListener('click', (event) => {});
+
+  var myModal = new bootstrap.Modal(modalElement);
+  if (myModal) myModal.show();
+}
+
+async function deletePost() {
+  try {
+    await postApi.remove(this.post.id);
+    toast.success('Remove post successfully');
+    handleFilterChange();
+  } catch (error) {
+    console.log('failed to remove post', error);
+    toast.error(error.message);
+  }
 }
 
 function registerPostDeleteEvent() {
-  document.addEventListener('post-delete', async (event) => {
-    try {
-      const modalElement = document.getElementById('modalRemove');
-      if (!modalElement) return;
-      const post = event.detail;
-      const message = ` Are you sure to remove post ${post.title}`;
-      const dangerElement = document.querySelector('.danger');
-      if (dangerElement) {
-        dangerElement.textContent = message;
-      }
-      if (!window.bootstrap) return;
-      const modal = new window.bootstrap.Modal(modalElement);
-      if (modal) modal.show();
-      const confirm = modalElement.querySelector('.confirm');
-      if (!confirm) return;
-      confirm.addEventListener('click', async (event) => {
-        await postApi.remove(post.id);
-        await handleFilterChange();
-        toast.success('Remove post successfully');
-        modal.hide();
-      });
-    } catch (error) {
-      console.log('failed to remove post', error);
-      toast.error(error.message);
+  const modalElement = document.getElementById('modalRemove');
+  if (!modalElement) return;
+
+  const dangerElement = modalElement.querySelector('.danger');
+  const confirm = modalElement.querySelector('.confirm');
+  if (!confirm || !dangerElement) return;
+
+  let handleDelete;
+  document.addEventListener('post-delete', (event) => {
+    if (handleDelete) {
+      confirm.removeEventListener('click', handleDelete);
     }
+
+    const post = {
+      post: event.detail,
+    };
+
+    const message = `Are you sure to remove post ${post.title}`;
+    dangerElement.textContent = message;
+
+    showModal(modalElement);
+
+    handleDelete = deletePost.bind(post);
+    confirm.addEventListener('click', handleDelete);
   });
 }
 
@@ -46,13 +61,12 @@ async function handleFilterChange(filterName, filterValue) {
 
     if (filterName) url.searchParams.set(filterName, filterValue);
 
-    if (filterName === 'title_like') url.searchParams.set('_page', 1);
-
     history.pushState({}, '', url);
 
     // fetch API
     // re-render post list
     const { data, pagination } = await postApi.getAll(url.searchParams);
+
     renderPostList('postList', data);
     renderPagination('pagination', pagination);
   } catch (error) {
@@ -66,7 +80,7 @@ async function handleFilterChange(filterName, filterValue) {
 
     //update search param if needed
     if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1);
-    if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 12);
+    if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 6);
 
     history.pushState({}, '', url);
     const queryParams = url.searchParams;
@@ -84,6 +98,7 @@ async function handleFilterChange(filterName, filterValue) {
       defaultParams: queryParams,
       onChange: (value) => handleFilterChange('title_like', value),
     });
+    // activePagination();
 
     // set default pagination (_limit,_page) on URL
     // render post list based URL params
