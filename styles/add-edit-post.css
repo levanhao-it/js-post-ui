@@ -36,3 +36,15 @@
       );
       box-shadow: 0 4px 15px 0 rgba(65, 132, 234, 0.75);
     }
+    #postDetailTitle {
+      width: 100%; 
+      text-align: center; 
+      border-bottom: 3px solid #04befe; 
+      line-height: 0.1em;
+      margin: 10px 0 20px; 
+   } 
+   
+   #postDetailTitle span { 
+       background:#fff; 
+       padding:0 10px; 
+   }

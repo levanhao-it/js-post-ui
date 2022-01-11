@@ -51,6 +51,7 @@ function registerPostDeleteEvent() {
 
     handleDelete = deletePost.bind(post);
     confirm.addEventListener('click', handleDelete);
+    handleFilterChange();
   });
 }
 
@@ -98,7 +99,6 @@ async function handleFilterChange(filterName, filterValue) {
       defaultParams: queryParams,
       onChange: (value) => handleFilterChange('title_like', value),
     });
-    // activePagination();
 
     // set default pagination (_limit,_page) on URL
     // render post list based URL params

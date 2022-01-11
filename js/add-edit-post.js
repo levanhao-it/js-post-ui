@@ -51,7 +51,7 @@ async function handlePostFormSubmit(formValues) {
     // redirect to detail page
     setTimeout(() => {
       window.location.assign(`/post-detail.html?id=${savedPost.id}`);
-    }, 2000);
+    }, 500);
   } catch (error) {
     console.log('failed to save post', error);
     toast.error(`Error: ${error.message} `);
@@ -67,7 +67,7 @@ async function handlePostFormSubmit(formValues) {
     const nameTitle = Boolean(postId) ? 'Edit post' : 'Add a new post';
     const nameTilleElement = document.getElementById('postDetailTitle');
     if (nameTilleElement) {
-      nameTilleElement.textContent = nameTitle;
+      nameTilleElement.innerHTML = `<span>${nameTitle}</span>`;
     }
 
     let defaultValues = Boolean(postId)
