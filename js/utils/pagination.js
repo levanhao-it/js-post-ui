@@ -65,7 +65,6 @@ export async function renderPaginationNumber(onChange) {
 
 export function renderPagination(elementId, pagination) {
   const ulPagination = document.getElementById(elementId);
-
   if (!ulPagination) return;
 
   // calc toPages
@@ -102,7 +101,17 @@ export function initPagination({ elementId, defaultParams, onChange }) {
     prevLink.addEventListener('click', (e) => {
       e.preventDefault();
       const page = Number.parseInt(ulPagination.dataset.page) || 1;
-      if (page >= 2) onChange?.(page - 1);
+      if (page >= 2) {
+        ulPagination
+          .querySelector('.pageNum')
+          .querySelector(`[data-page-number="${page}"]`)
+          .classList.remove('active');
+        ulPagination
+          .querySelector('.pageNum')
+          .querySelector(`[data-page-number="${page - 1}"]`)
+          .classList.add('active');
+        onChange?.(page - 1);
+      }
     });
   }
 
@@ -114,7 +123,17 @@ export function initPagination({ elementId, defaultParams, onChange }) {
       const page = Number.parseInt(ulPagination.dataset.page) || 1;
       const total_Pages = ulPagination.dataset.totalPages;
       if (page >= total_Pages) return;
-      if (page < total_Pages) onChange?.(page + 1);
+      if (page < total_Pages) {
+        ulPagination
+          .querySelector('.pageNum')
+          .querySelector(`[data-page-number="${page}"]`)
+          .classList.remove('active');
+        ulPagination
+          .querySelector('.pageNum')
+          .querySelector(`[data-page-number="${page + 1}"]`)
+          .classList.add('active');
+        onChange?.(page + 1);
+      }
     });
   }
   renderPaginationNumber(onChange);
